@@ -1,0 +1,436 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Newton1pruebas</title><meta name="generator" content="MATLAB 7.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-17"><meta name="DC.source" content="Newton1pruebas.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">function</span> [x] = Newton1pruebas (point,fungrad,name,maxit)
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+<span class="comment">%prueba realizada con funcion de prueba min=(x-1)^2 +(x-3.5)^2</span>
+<span class="comment">%se conoce con antelacion el minimo (1,3,5)</span>
+<span class="comment">%se probara para 3 casos (GC=gradienteConjugado; LS=lineSearch:</span>
+<span class="comment">%</span>
+<span class="comment">%   1) SI AMPL, NO GC, NO LS</span>
+<span class="comment">%   2) SI AMPL, SI GC, NO LS</span>
+<span class="comment">%   3) SI AMPL, NO GC, SI LS</span>
+<span class="comment">%   4) SI AMPL, SI GC, SI LS</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+<span class="comment">%   Salvador Garcia G. Octubre 2013</span>
+<span class="comment">%</span>
+<span class="comment">%   ITAM, Analisis Aplicado I</span>
+<span class="comment">%</span>
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">%mandar llamar con:</span>
+<span class="comment">%{
+</span><span class="comment">%
+</span><span class="comment">%incluir el path antes de iniciar
+</span><span class="comment">%path(path,'/bin/AMPL/');
+</span><span class="comment">%
+</span><span class="comment">%
+</span><span class="comment">%prueba 1
+</span><span class="comment">%funcion min=(x-1)^2 +(x-3.5)^2
+</span><span class="comment">use_ampl_stub rosenbr.nl;
+</span><span class="comment">x=miprueba ('amplpnt','amplstub', 'rosenbr', 50);
+</span><span class="comment">
+</span><span class="comment">%prueba2
+</span><span class="comment">%funcion banana de rosenberg
+</span><span class="comment">use_ampl_stub rosenbrOriginal.nl;
+</span><span class="comment">x=miprueba ('amplpnt','amplstub', 'rosenbrOriginal', 50);
+</span><span class="comment">
+</span><span class="comment">%prueba3
+</span><span class="comment">%arglina
+</span><span class="comment">use_ampl_stub arglina.nl;
+</span><span class="comment">x=miprueba ('amplpnt','amplstub', 'arglina', 50);
+</span><span class="comment">
+</span><span class="comment">%prueba conflictiva
+</span><span class="comment">%biggs6
+</span><span class="comment">use_ampl_stub biggs6.nl;
+</span><span class="comment">x=miprueba ('amplpnt','amplstub', 'biggs6', 50);
+</span><span class="comment">
+</span><span class="comment">%prueba mas conflictiva
+</span><span class="comment">%maratosb.nl
+</span><span class="comment">use_ampl_stub maratosb.nl;
+</span><span class="comment">x=miprueba ('amplpnt','amplstub', 'maratosb', 50);
+</span><span class="comment">
+</span><span class="comment">%prueba una y me rindo
+</span><span class="comment">%extrosnb
+</span><span class="comment">use_ampl_stub extrosnb.nl
+</span><span class="comment">x=Newton1pruebas('amplpnt','amplstub', 'extrosnb', 50);
+</span><span class="comment">%}
+</span>
+<span class="comment">%7 nov/SEGUNDO PROYECTO</span>
+<span class="comment">%prueba pol.mod</span>
+
+<span class="comment">%path(path,'/bin/AMPL/');</span>
+<span class="comment">%use_ampl_stub pol.nl;</span>
+<span class="comment">%x=Newton1pruebas ('amplpnt','amplstub', 'pol', 50);</span>
+
+<span class="comment">%12 nov/SEGUNDO PROYECTO</span>
+<span class="comment">%use_ampl_stub regrlog.nl;</span>
+<span class="comment">%use_ampl_stub train.nl;</span>
+<span class="comment">%x=Newton1pruebas ('amplpnt','amplstub', 'train', 50);</span>
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+
+
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+[x,s,y]=feval(point);
+[f,c,g,A,H]=feval(fungrad,x,s,y);
+
+
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+n=length(x);
+m=length(y);
+iter=0; tol=10e-6; norm_g=inf;
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+<span class="comment">%fprintf( 1, ' Problema  ......................... %s    \n', name);</span>
+<span class="comment">%fprintf( 1, ' Numero de variables  .............. %3i   \n', n);</span>
+<span class="comment">%fprintf( 1, ' Numero de restricciones ........... %3i \n\n', m);</span>
+<span class="comment">%fprintf( 1, ' ITER         f                ||g||   \n\n');</span>
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+<span class="keyword">while</span> ( norm_g &gt; tol &amp;&amp; iter &lt;= maxit )
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">    %{
+</span><span class="comment">    %%%% 1) SI AMPL, NO GC, NO LS
+</span><span class="comment">    p_N = -H\g;
+</span><span class="comment">    x = x + p_N;
+</span><span class="comment">    [f,c,g,A,H] = feval(fungrad,x,s,y);
+</span><span class="comment">    norm_g = norm(g);
+</span><span class="comment">    fprintf( fout, ' %3i   % 14.8e   %14.8e  \n', iter,    f,   norm_g );
+</span><span class="comment">    iter = iter + 1;
+</span><span class="comment">    %}
+</span>    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">    %{
+</span><span class="comment">    %%%% 2) SI AMPL, SI GC, NO LS
+</span><span class="comment">    p_N=GradienteConjugado2(H,-g,x,10e-12);
+</span><span class="comment">    x1   = x + p_N;
+</span><span class="comment">    x=x1+x;
+</span><span class="comment">    [ f, c, g, A, H ] = feval( fungrad, x, s, y);
+</span><span class="comment">    norm_g = norm(g);
+</span><span class="comment">    fprintf( 1, ' %3i   % 14.8e   %14.8e  \n', iter,    f,   norm_g );
+</span><span class="comment">    iter = iter + 1;
+</span><span class="comment">    %}
+</span>    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+
+
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+    <span class="comment">%%%% 3) SI AMPL, NO GC, SI LS</span>
+    <span class="comment">%p_N = -H\g;</span>
+    <span class="comment">%[alpha,x,f,g]=linesch_sw(x,f,g,p_N,fungrad,s,y,0.0001,0.9,2);</span>
+    <span class="comment">%[f,c,g,A,H]=feval(fungrad,x,s,y);</span>
+    <span class="comment">%norm_g = norm(g);</span>
+    <span class="comment">%fprintf( 1, ' %3i   % 14.8e   %14.8e  \n', iter,    f,   norm_g );</span>
+    <span class="comment">%iter = iter + 1;</span>
+    <span class="comment">%}</span>
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+
+
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+    <span class="comment">%%%% 4) SI AMPL, SI GC, SI LS</span>
+    p_N=GradienteConjugado2(H,-g,x,10e-6);
+    p_N =( x + p_N);
+    <span class="keyword">if</span>(p_N'*(-g) &lt; 0)
+       p_N=-g;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span>(norm(p_N)&lt;tol || norm(g)&lt;tol)
+        <span class="comment">%fprintf('es optimo     ');</span>
+         [f,c,g,A,H]=feval(fungrad,x,s,y);
+         <span class="comment">%fprintf('%14.8e\n', f);</span>
+
+        <span class="keyword">break</span>;
+    <span class="keyword">end</span>
+
+    [alpha,x,f,g]=linesch_sw(x,f,g,p_N,fungrad,s,y,0.0001,0.9,2);
+    [f,c,g,A,H]=feval(fungrad,x,s,y);
+    <span class="comment">%alpha</span>
+    <span class="comment">%x</span>
+    norm_g = norm(g);
+    fprintf( 1, <span class="string">' %3i   % 14.8e   %14.8e  \n'</span>, iter,    f,   norm_g );
+    iter = iter + 1;
+    <span class="comment">%}</span>
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+
+
+
+<span class="keyword">end</span>
+<span class="comment">%fprintf(' f                ||g||   \n\n');</span>
+<span class="comment">%fprintf(' % 14.8e   %14.8e  \n',    f,   norm_g)</span>
+
+
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Input argument "point" is undefined.
+
+Error in ==&gt; Newton1pruebas at 80
+[x,s,y]=feval(point);
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.12<br></p></div><!--
+##### SOURCE BEGIN #####
+function [x] = Newton1pruebas (point,fungrad,name,maxit)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+%
+%prueba realizada con funcion de prueba min=(x-1)^2 +(x-3.5)^2
+%se conoce con antelacion el minimo (1,3,5)
+%se probara para 3 casos (GC=gradienteConjugado; LS=lineSearch:
+%
+%   1) SI AMPL, NO GC, NO LS
+%   2) SI AMPL, SI GC, NO LS
+%   3) SI AMPL, NO GC, SI LS
+%   4) SI AMPL, SI GC, SI LS
+%   
+%
+%   Salvador Garcia G. Octubre 2013
+%
+%   ITAM, Analisis Aplicado I
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%mandar llamar con:
+%{
+%
+%incluir el path antes de iniciar
+%path(path,'/bin/AMPL/');
+%
+%
+%prueba 1
+%funcion min=(x-1)^2 +(x-3.5)^2
+use_ampl_stub rosenbr.nl;
+x=miprueba ('amplpnt','amplstub', 'rosenbr', 50);
+
+%prueba2
+%funcion banana de rosenberg
+use_ampl_stub rosenbrOriginal.nl;
+x=miprueba ('amplpnt','amplstub', 'rosenbrOriginal', 50);
+
+%prueba3
+%arglina
+use_ampl_stub arglina.nl;
+x=miprueba ('amplpnt','amplstub', 'arglina', 50);
+
+%prueba conflictiva
+%biggs6
+use_ampl_stub biggs6.nl;
+x=miprueba ('amplpnt','amplstub', 'biggs6', 50);
+
+%prueba mas conflictiva
+%maratosb.nl
+use_ampl_stub maratosb.nl;
+x=miprueba ('amplpnt','amplstub', 'maratosb', 50);
+
+%prueba una y me rindo
+%extrosnb
+use_ampl_stub extrosnb.nl
+x=Newton1pruebas('amplpnt','amplstub', 'extrosnb', 50);
+%}
+
+%7 nov/SEGUNDO PROYECTO
+%prueba pol.mod
+    
+%path(path,'/bin/AMPL/');
+%use_ampl_stub pol.nl;
+%x=Newton1pruebas ('amplpnt','amplstub', 'pol', 50);
+
+%12 nov/SEGUNDO PROYECTO
+%use_ampl_stub regrlog.nl;
+%use_ampl_stub train.nl;
+%x=Newton1pruebas ('amplpnt','amplstub', 'train', 50);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[x,s,y]=feval(point);
+[f,c,g,A,H]=feval(fungrad,x,s,y);
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+n=length(x);
+m=length(y);
+iter=0; tol=10e-6; norm_g=inf;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%fprintf( 1, ' Problema  ......................... %s    \n', name);
+%fprintf( 1, ' Numero de variables  .............. %3i   \n', n);
+%fprintf( 1, ' Numero de restricciones ........... %3i \n\n', m);
+%fprintf( 1, ' ITER         f                ||g||   \n\n');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+while ( norm_g > tol && iter <= maxit )
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %{
+    %%%% 1) SI AMPL, NO GC, NO LS
+    p_N = -H\g;
+    x = x + p_N;
+    [f,c,g,A,H] = feval(fungrad,x,s,y);
+    norm_g = norm(g);
+    fprintf( fout, ' %3i   % 14.8e   %14.8e  \n', iter,    f,   norm_g );  
+    iter = iter + 1;
+    %}
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %{
+    %%%% 2) SI AMPL, SI GC, NO LS
+    p_N=GradienteConjugado2(H,-g,x,10e-12);
+    x1   = x + p_N; 
+    x=x1+x;
+    [ f, c, g, A, H ] = feval( fungrad, x, s, y);   
+    norm_g = norm(g);
+    fprintf( 1, ' %3i   % 14.8e   %14.8e  \n', iter,    f,   norm_g );  
+    iter = iter + 1;
+    %}
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+   
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %%%% 3) SI AMPL, NO GC, SI LS
+    %p_N = -H\g;
+    %[alpha,x,f,g]=linesch_sw(x,f,g,p_N,fungrad,s,y,0.0001,0.9,2);
+    %[f,c,g,A,H]=feval(fungrad,x,s,y);
+    %norm_g = norm(g);
+    %fprintf( 1, ' %3i   % 14.8e   %14.8e  \n', iter,    f,   norm_g );  
+    %iter = iter + 1;
+    %}
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   
+    
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %%%% 4) SI AMPL, SI GC, SI LS
+    p_N=GradienteConjugado2(H,-g,x,10e-6);
+    p_N =( x + p_N); 
+    if(p_N'*(-g) < 0)
+       p_N=-g; 
+    end
+    if(norm(p_N)<tol || norm(g)<tol)
+        %fprintf('es optimo     ');
+         [f,c,g,A,H]=feval(fungrad,x,s,y);
+         %fprintf('%14.8e\n', f);
+        
+        break;
+    end
+  
+    [alpha,x,f,g]=linesch_sw(x,f,g,p_N,fungrad,s,y,0.0001,0.9,2);
+    [f,c,g,A,H]=feval(fungrad,x,s,y);
+    %alpha
+    %x
+    norm_g = norm(g);
+    fprintf( 1, ' %3i   % 14.8e   %14.8e  \n', iter,    f,   norm_g );  
+    iter = iter + 1;
+    %}
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    
+    
+    
+end
+%fprintf(' f                ||g||   \n\n');
+%fprintf(' % 14.8e   %14.8e  \n',    f,   norm_g)
+
+
+end 
+
+##### SOURCE END #####
+--></body></html>

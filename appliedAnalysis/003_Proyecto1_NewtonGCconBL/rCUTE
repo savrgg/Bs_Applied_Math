@@ -1,0 +1,82 @@
+#!/usr/bin/perl -w
+#
+#------------------------------------------------------------------
+#   
+#     running a list of problems with exAMPL a naive
+#     implementation of Newton's method
+#     j-l morales  june, 2013
+#
+#------------------------------------------------------------------
+#
+#
+use FileHandle;
+use IPC::Open2;
+$path = "/bin/AMPL/";
+$filename = "LIST_large2";
+
+  $RESJ = "RES";
+  mkdir(/Users/SavrGG/Dropbox/Computadoras/001_MATLAB/001_AnalisisAplicado/006_Proyecto2/$RESJ, 0750);
+ 
+  open LIST, $filename or die "Couldn't open file $filename\n";
+
+#     Now read and process one line at a time
+#------------------
+  $pid = open2(*RESPONSE, *MATLAB,"matlab -nojvm");
+  $pid or die;
+#------------------
+while( <LIST> )
+{
+    chomp;
+    if ( $_ eq "" ) { print "\n   *** End of the list *** \n"; last; }
+#
+    @names = split;
+    $name = shift @names;
+    print "  Processing $name  \n";
+
+#----
+    open AMPL, "|ampl > /dev/null";
+
+    print AMPL &q(<<"    ENDAMPL");
+    : reset;
+    : model  /Users/SavrGG/Dropbox/Computadoras/001_MATLAB/001_AnalisisAplicado/006_Proyecto2/$name.mod;
+    : write g$name;
+    ENDAMPL
+    close(AMPL);
+        
+    print MATLAB &q(<<"    ENDMATLAB");
+    : path(path,'/bin/AMPL/');
+    : use_ampl_stub $name.nl;
+    : [x_op] = miprueba ( 'amplpnt', 'amplstub', '$name', 50 );
+    : 
+    : disp( 'Next problem' );
+    : 
+    ENDMATLAB
+
+
+    while( $got = <RESPONSE> ) {
+      last if $got =~ /Next problem/;
+    }
+
+   system("rm $name.nl");
+    system("mv $name $RESJ/$name");
+
+#----
+}    
+
+close MATLAB or die $!;
+close RESPONSE or die $!;
+close LIST or die $!;
+
+
+chdir($path) or die "Cant chdir to $path $!";
+#system("grep -h sum *.sum > Reporte");
+
+#                            
+
+sub q{
+    my $string  = $_[0];
+    $string =~ s/^\s*://gm;
+    #$string =~ s{ (.*)\*/\s*$ }{ sprintf "%-73s*/\n", $1 }gmex;
+    
+    return $string;
+}
